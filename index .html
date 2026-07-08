@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anneanne Eşya Bulucu</title>
+    <style>
+        /* Anneannenin rahat görmesi için büyük ve sade tasarladık */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #34495e;
+            font-size: 18px;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 18px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #27ae60;
+        }
+        hr {
+            margin: 30px 0;
+            border: 0;
+            border-top: 2px solid #ecf0f1;
+        }
+        h2 {
+            color: #2c3e50;
+            font-size: 22px;
+        }
+        .item-list {
+            list-style: none;
+            padding: 0;
+        }
+        .item-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+            border-radius: 5px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+        }
+        .item-details strong {
+            color: #e74c3c;
+            font-size: 20px;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        .empty-text {
+            color: #7f8c8d;
+            text-align: center;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>👵 Anneanne Eşya Bulucu</h1>
+    
+    <!-- EŞYAYI KAYDETME BÖLÜMÜ -->
+    <div class="form-group">
+        <label for="itemName">🔍 Ne Koydun? (Zorunlu)</label>
+        <input type="text" id="itemName" placeholder="Örn: Gözlük, İlaç, Cüzdan">
+    </div>
+    
+    <div class="form-group">
+        <label for="itemPlace">📍 Nereye Koydun? (Zorunlu)</label>
+        <input type="text" id="itemPlace" placeholder="Örn: Mutfak, Yatak Odası">
+    </div>
+    
+    <div class="form-group">
+        <label for="itemShelf">🗄️ Raf / Dolap No (İsteğe Bağlı)</label>
+        <input type="text" id="itemShelf" placeholder="Örn: Üst raf, 2. çekmece (Boş kalabilir)">
+    </div>
+    
+    <button onclick="esyaEkle()">➕ Listeye Ekle</button>
+    
+    <hr>
+    
+    <!-- LİSTELEME BÖLÜMÜ -->
+    <h2>Kayıtlı Eşyalar</h2>
+    <ul id="itemList" class="item-list">
+        <!-- Eşyalar buraya otomatik gelecek -->
+    </ul>
+</div>
+
+<script>
+    // Sayfa açıldığında daha önce kaydedilen eşyaları yükle
+    document.addEventListener("DOMContentLoaded", listeyiGoster);
+
+    function esyaEkle() {
+        const name = document.getElementById("itemName").value.trim();
+        const place = document.getElementById("itemPlace").value.trim();
+        const shelf = document.getElementById("itemShelf").value.trim();
+
+        // Zorunlu alan kontrolü
+        if (name === "" || place === "") {
+            alert("Lütfen ne koyduğunu ve nereye koyduğunu yaz anneanneciğim! ❤️");
+            return;
+        }
+
+        // Yeni eşya objesi
+        const yeniEsya = {
+            id: Date.now(),
+            name: name,
+            place: place,
+            shelf: shelf ? shelf : "Belirtilmedi" // Boş bırakılırsa yazılacak metin
+        };
+
+        // Mevcut listeyi al veya boş dizi oluştur
+        let esyalar = JSON.parse(localStorage.getItem("anneanneEsyalari")) || [];
+        esyalar.push(yeniEsya);
+
+        // Tarayıcı hafızasına kaydet
+        localStorage.setItem("anneanneEsyalari", JSON.stringify(esyalar));
+
+        // Formu temizle
+        document.getElementById("itemName").value = "";
+        document.getElementById("itemPlace").value = "";
+        document.getElementById("itemShelf").value = "";
+
+        // Listeyi yenile
+        listeyiGoster();
+    }
+
+    function listeyiGoster() {
+        const itemList = document.getElementById("itemList");
+        itemList.innerHTML = ""; // İçini temizle
+
+        let esyalar = JSON.parse(localStorage.getItem("anneanneEsyalari")) || [];
+
+        if (esyalar.length === 0) {
+            itemList.innerHTML = '<p class="empty-text">Henüz kaydedilmiş bir eşya yok.</p>';
+            return;
+        }
+
+        // Her eşyayı ekrana kart olarak bas
+        esyalar.forEach(esya => {
+            const li = document.createElement("li");
+            li.className = "item-card";
+            li.innerHTML = `
+                <div class="item-details">
+                    <strong>${esya.name}</strong> <br>
+                    📍 Yer: ${esya.place} <br>
+                    <small>🗄️ Detay: ${esya.shelf}</small>
+                </div>
+                <button class="delete-btn" onclick="esyaSil(${esya.id})">Bulundu / Sil</button>
+            `;
+            itemList.appendChild(li);
+        });
+    }
+
+    function esyaSil(id) {
+        let esyalar = JSON.parse(localStorage.getItem("anneanneEsyalari")) || [];
+        // Seçilen id dışındakileri filtrele (yani onu sil)
+        esyalar = esyalar.filter(esya => esya.id !== id);
+        localStorage.setItem("anneanneEsyalari", JSON.stringify(esyalar));
+        listeyiGoster();
+    }
+</script>
+
+</body>
+</html>
